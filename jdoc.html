@@ -1,0 +1,431 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>结算助手 - 可配置版</title>
+    <style>
+        :root { 
+            --primary: #1890ff; 
+            --success: #52c41a; 
+            --dark: #001529; 
+            --danger: #ff4d4f;
+            --border: #d9d9d9;
+        }
+        
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #f5f7fa; 
+            margin: 0; 
+            padding: 12px; 
+            color: #333; 
+        }
+        
+        .container { 
+            max-width: 650px; 
+            margin: 0 auto; 
+            background: #fff; 
+            padding: 16px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+        }
+
+        h2 { 
+            font-size: 20px; 
+            color: var(--primary); 
+            text-align: center; 
+            margin: 8px 0 16px; 
+        }
+        
+        .config-section { 
+            background: #fafafa; 
+            padding: 12px; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            border: 1px solid #f0f0f0; 
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-item { 
+            display: flex; 
+            flex-direction: column; 
+            margin-bottom: 12px; 
+        }
+
+        label { 
+            font-weight: 600; 
+            margin-bottom: 6px; 
+            font-size: 13px; 
+            color: #666; 
+        }
+        
+        input, textarea { 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            padding: 10px; 
+            font-size: 14px; 
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+
+        textarea { 
+            height: 120px; 
+            font-family: "SF Mono", "Consolas", monospace; 
+            background: #fff; 
+            resize: vertical;
+        }
+
+        /* 规则配置卡片样式 */
+        .rule-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 40px;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .rule-row header {
+            font-size: 12px;
+            color: #888;
+            font-weight: bold;
+        }
+
+        .btn-del {
+            background: #fff1f0;
+            color: var(--danger);
+            border: 1px solid #ffa39e;
+            border-radius: 6px;
+            height: 38px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add {
+            background: #e6f7ff;
+            color: var(--primary);
+            border: 1px dashed var(--primary);
+            padding: 8px;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .btn-group { 
+            display: grid; 
+            grid-template-columns: 2fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
+
+        .btn { 
+            border: none; 
+            padding: 14px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold; 
+            transition: opacity 0.2s; 
+        }
+
+        .btn-calculate { background: var(--primary); color: white; }
+        .btn-clear { background: var(--danger); color: white; }
+        .btn:active { opacity: 0.7; }
+
+        .result-box { 
+            background: var(--dark); 
+            border-radius: 12px; 
+            padding: 14px; 
+            margin-bottom: 15px; 
+        }
+
+        .result-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+            border-bottom: 1px solid #102a43; 
+            padding-bottom: 8px; 
+        }
+
+        .result-title { color: #8c8c8c; font-size: 13px; font-weight: bold; }
+        
+        .copy-btn { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 12px; 
+        }
+
+        .copy-btn.success { background: var(--success); }
+
+        pre { 
+            color: #d6e4ff; 
+            margin: 0; 
+            white-space: pre-wrap; 
+            word-break: break-all;
+            font-size: 13px; 
+            line-height: 1.6; 
+            font-family: "SF Mono", "Menlo", monospace; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>结算数据处理系统</h2>
+    
+    <div class="config-section">
+        <div class="input-item">
+            <label for="uprice">U 价格 (uprice)</label>
+            <input type="number" id="uprice" value="6.76" step="0.01" inputmode="decimal">
+        </div>
+
+        <div class="section-title">
+            <span>费率配置</span>
+            <span style="font-size: 11px; color: #888; font-weight: normal;">支持精确/包含匹配</span>
+        </div>
+        
+        <div class="rule-row" style="margin-bottom: 4px;">
+            <header>关键字/通道</header>
+            <header>LW费率</header>
+            <header>DCM费率</header>
+            <header></header>
+        </div>
+        <div id="rulesContainer"></div>
+        <button class="btn-add" onclick="addRuleRow()">+ 添加新规则</button>
+    </div>
+
+    <div class="config-section">
+        <div class="input-item" style="margin-bottom: 0;">
+            <label for="rawData">粘贴原始数据</label>
+            <textarea id="rawData" placeholder="请在这里粘贴查询结果..."></textarea>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-calculate" onclick="calculate()">生成报表</button>
+        <button class="btn btn-clear" onclick="clearData()">清空数据</button>
+    </div>
+
+    <!-- LW 区域 -->
+    <div class="result-box">
+        <div class="result-header">
+            <span class="result-title">LW 报表</span>
+            <button class="copy-btn" onclick="copyResult('lw-pre', this)">复制</button>
+        </div>
+        <pre id="lw-pre">请先输入数据...</pre>
+    </div>
+
+    <!-- DCM 区域 -->
+    <div class="result-box">
+        <div class="result-header">
+            <span class="result-title">DCM 报表</span>
+            <button class="copy-btn" onclick="copyResult('dcm-pre', this)">复制</button>
+        </div>
+        <pre id="dcm-pre">请先输入数据...</pre>
+    </div>
+</div>
+
+<script>
+    // 默认规则配置项
+    const defaultRules = [
+        { keyword: "支付宝gmm", lwRate: 0.025, dcmRate: 0.035 },
+        { keyword: "支付宝", lwRate: 0.007, dcmRate: 0.007 },
+        { keyword: "数字", lwRate: 0.005, dcmRate: 0.012, displayName: "数字人民币" },
+        { keyword: "银联", lwRate: 0.02, dcmRate: 0.02, displayName: "银联扫码" },
+        { keyword: "微信京东", lwRate: 0.035, dcmRate: 0.035 }
+    ];
+
+    // 初始化渲染规则配置列表
+    function initRules() {
+        const container = document.getElementById('rulesContainer');
+        container.innerHTML = '';
+        defaultRules.forEach(rule => addRuleRow(rule.keyword, rule.lwRate, rule.dcmRate, rule.displayName));
+    }
+
+    // 动态添加一行配置规则
+    function addRuleRow(keyword = '', lwRate = '', dcmRate = '', displayName = '') {
+        const container = document.getElementById('rulesContainer');
+        const row = document.createElement('div');
+        row.className = 'rule-row';
+        row.innerHTML = `
+            <input type="text" class="rule-kw" placeholder="关键字" value="${keyword}" data-display="${displayName}">
+            <input type="number" class="rule-lw" placeholder="LW" value="${lwRate}" step="0.001">
+            <input type="number" class="rule-dcm" placeholder="DCM" value="${dcmRate}" step="0.001">
+            <button class="btn-del" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(row);
+    }
+
+    // 从页面收集当前设置的规则
+    function getRulesFromUI() {
+        const rows = document.querySelectorAll('#rulesContainer .rule-row');
+        const rules = [];
+        rows.forEach(row => {
+            const kwInput = row.querySelector('.rule-kw');
+            const kw = kwInput.value.trim();
+            const lwRate = parseFloat(row.querySelector('.rule-lw').value) || 0;
+            const dcmRate = parseFloat(row.querySelector('.rule-dcm').value) || 0;
+            const displayName = kwInput.dataset.display || kw;
+
+            if (kw) {
+                rules.push({ keyword: kw, lwRate, dcmRate, displayName });
+            }
+        });
+
+        // 优先匹配更长、更精确的关键词（解决“支付宝”和“支付宝gmm”的前缀冲突）
+        rules.sort((a, b) => b.keyword.length - a.keyword.length);
+        return rules;
+    }
+
+    function javaDown(num) {
+        return Math.floor(num + 0.0000000001);
+    }
+
+    function clearData() {
+        document.getElementById('rawData').value = '';
+        document.getElementById('lw-pre').textContent = '请先输入数据...';
+        document.getElementById('dcm-pre').textContent = '请先输入数据...';
+    }
+
+    function getPeriod() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const day = today.getDate();
+        let start, end;
+
+        if (day <= 10) {
+            start = new Date(year, month - 1, 21);
+            end = new Date(year, month, 0); 
+        } else if (day <= 20) {
+            start = new Date(year, month, 1);
+            end = new Date(year, month, 10);
+        } else {
+            start = new Date(year, month, 11);
+            end = new Date(year, month, 20);
+        }
+
+        const fmt = d => `${d.getMonth() + 1}月${d.getDate()}日`;
+        return `${fmt(start)}-${fmt(end)}`;
+    }
+
+    function calculate() {
+        const uprice = parseFloat(document.getElementById('uprice').value) || 6.76;
+        const rawText = document.getElementById('rawData').value.trim();
+        if (!rawText) return;
+
+        const rules = getRulesFromUI();
+        const dateRange = getPeriod();
+        const lines = rawText.split(/\n/).map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length < 1) return;
+
+        const lastLineArr = lines[lines.length - 1].split(/\s+/);
+        const dataShJsCount = parseFloat(lastLineArr[3]) || 0;
+        const dataShCount = parseFloat(lastLineArr[4]) || 0;
+
+        let lwLines = [dateRange];
+        let dcmLines = [dateRange];
+        let totalSuccess = 0, totalShJsCount = 0, totalMineJsCount = 0;
+
+        for (let i = 0; i < lines.length - 1; i++) {
+            const arr = lines[i].split(/\s+/);
+            if (arr.length < 2) continue;
+            const name = arr[0];
+            const count = parseFloat(arr[1]) || 0;
+            totalSuccess += count;
+
+            let lwRowVal = 0, dcmRowVal = 0;
+            
+            // 在动态规则中查找匹配项
+            const matchedRule = rules.find(r => name.includes(r.keyword));
+
+            if (matchedRule) {
+                const label = matchedRule.displayName || matchedRule.keyword;
+                
+                lwRowVal = javaDown(count * matchedRule.lwRate);
+                dcmRowVal = javaDown(count * matchedRule.dcmRate);
+                
+                lwLines.push(`${label}:${count}*${matchedRule.lwRate}=${lwRowVal}`);
+                dcmLines.push(`${label}:${count}*${matchedRule.dcmRate}=${dcmRowVal}`);
+            }
+
+            totalShJsCount += lwRowVal;
+            totalMineJsCount += dcmRowVal;
+        }
+
+        const lwU = javaDown(totalShJsCount / uprice);
+        lwLines.push(`合计：${javaDown(totalSuccess)}      ${totalShJsCount}`);
+        lwLines.push(`合计u：${totalShJsCount}/${uprice}=${lwU}u`);
+        document.getElementById('lw-pre').textContent = lwLines.join('\n');
+
+        const dSub = javaDown(dataShCount - dataShJsCount);
+        const dU = javaDown(dSub / uprice);
+        dcmLines.push(`合计：${javaDown(totalSuccess)}      ${totalMineJsCount}`);
+        dcmLines.push(`商户-商户结算 ：${dataShCount}-${dataShJsCount}=${javaDown(dSub)}`);
+        dcmLines.push(`合计u：${javaDown(totalMineJsCount)}/${uprice}=${dU}u`);
+        document.getElementById('dcm-pre').textContent = dcmLines.join('\n');
+    }
+
+    async function copyResult(elementId, btn) {
+        const text = document.getElementById(elementId).textContent;
+        if (text.includes("请先输入")) return;
+
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+            showSuccess(btn);
+        } catch (err) {
+            console.error('复制失败:', err);
+        }
+    }
+
+    function showSuccess(btn) {
+        const oldText = btn.textContent;
+        btn.textContent = "成功";
+        btn.classList.add('success');
+        setTimeout(() => {
+            btn.textContent = oldText;
+            btn.classList.remove('success');
+        }, 1500);
+    }
+
+    // 页面加载时初始化默认规则
+    window.onload = initRules;
+</script>
+
+</body>
+</html>
